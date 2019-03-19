@@ -3,3 +3,9 @@
  */
 
 rootProject.name = 'chronicle-wire'
+
+include ':chronicle-bytes', ':chronicle-core', ':chronicle-threads'
+
+project(':chronicle-bytes').projectDir = new File(rootDir, "../chronicle-bytes")
+project(':chronicle-core').projectDir = new File(rootDir, "../chronicle-core")
+project(':chronicle-threads').projectDir = new File(rootDir, "../chronicle-threads")
