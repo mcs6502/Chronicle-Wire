@@ -578,7 +578,12 @@ public enum Wires {
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
-        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+        /**
+         * This is the implicit locale used by the {@link Date#toString()}
+         * method to format its output.
+         */
+        private static final Locale locale = Locale.UK;
+        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", locale);
         private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
         static {
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
