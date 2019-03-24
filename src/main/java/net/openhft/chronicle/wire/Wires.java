@@ -587,7 +587,10 @@ public enum Wires {
         private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
         static {
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
+            // the Timestamp.toString() method uses local time zone of its JVM,
+            // so we can't reset the time zone unless we want to read a
+            // timestamp that's different to the one that was originally written
+            // sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
         public static Date parseDate(ValueIn in) {
