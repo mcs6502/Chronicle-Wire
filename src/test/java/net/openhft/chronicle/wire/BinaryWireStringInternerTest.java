@@ -85,7 +85,7 @@ public final class BinaryWireStringInternerTest {
         }
 
         executorService.shutdown();
-        assertTrue("jobs did not complete in time", executorService.awaitTermination(5L, TimeUnit.SECONDS));
+        assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
         assertThat(capturedExceptions.isEmpty(), is(true));
     }
 
