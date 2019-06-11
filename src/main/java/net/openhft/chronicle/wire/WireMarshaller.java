@@ -139,7 +139,9 @@ public class WireMarshaller<T> {
             for (@NotNull FieldAccess field : fields) {
                 if (retainsComments)
                     bytes.comment(field.field.getName());
+
                 field.write(t, out);
+
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
@@ -253,6 +255,8 @@ public class WireMarshaller<T> {
         final long offset;
         @NotNull
         final WireKey key;
+
+        Comment commentAnnotation;
         Boolean isLeaf;
 
         FieldAccess(@NotNull Field field) {
@@ -261,9 +265,16 @@ public class WireMarshaller<T> {
 
         FieldAccess(@NotNull Field field, Boolean isLeaf) {
             this.field = field;
+
             offset = UNSAFE.objectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
+            try {
+                commentAnnotation = field.getAnnotation(Comment.class);
+            } catch (NullPointerException ignore) {
+
+            }
+
         }
 
         @Nullable
@@ -369,8 +380,23 @@ public class WireMarshaller<T> {
         }
 
         void write(Object o, @NotNull WireOut out) throws IllegalAccessException {
-            ValueOut write = out.write(field.getName());
-            getValue(o, write, null);
+
+            ValueOut valueOut = out.write(field.getName());
+
+            if (valueOut instanceof CommentAnnotationNotifier && this.commentAnnotation != null) {
+                CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
+                notifier.hasPrecedingComment(true);
+                try {
+                    getValue(o, valueOut, null);
+                    out.writeComment(String.format(this.commentAnnotation.value(), field.get(o)));
+                } finally {
+                    notifier.hasPrecedingComment(false);
+                }
+                return;
+            }
+
+            getValue(o, valueOut, null);
+
         }
 
         void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException {

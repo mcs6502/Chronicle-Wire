@@ -1069,7 +1069,9 @@ public class TextWire extends AbstractWire implements Wire {
 
     enum NoObject {NO_OBJECT}
 
-    class TextValueOut implements ValueOut {
+    class TextValueOut implements ValueOut, CommentAnnotationNotifier {
+        protected boolean hasCommentAnnotation = false;
+
         protected int indentation = 0;
         @NotNull
         protected List<BytesStore> seps = new ArrayList<>(4);
@@ -1079,6 +1081,11 @@ public class TextWire extends AbstractWire implements Wire {
         protected boolean dropDefault = false;
         @Nullable
         private String eventName;
+
+        @Override
+        public void hasPrecedingComment(boolean hasCommentAnnotation) {
+            this.hasCommentAnnotation = hasCommentAnnotation;
+        }
 
         @Override
         public void resetState() {
@@ -2030,9 +2037,21 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void writeComment(@NotNull CharSequence s) {
-            prependSeparator();
+
+            if (hasCommentAnnotation) {
+                if (!sep.endsWith('\n'))
+                    return;
+                sep = COMMA_SPACE;
+            } else
+                prependSeparator();
+
             append(sep);
+
+            if (hasCommentAnnotation)
+                writeTwo('\t', '\t');
+
             writeTwo('#', ' ');
+
             append(s);
             bytes.writeUnsignedByte('\n');
             sep = EMPTY_AFTER_COMMENT;
